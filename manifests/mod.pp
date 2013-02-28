@@ -46,4 +46,33 @@ define apache::mod (
     require => Package['httpd'],
     notify  => Service['httpd'],
   }
+
+  if $::osfamily == 'Debian' {
+    $enable_dir = $apache::params::mod_enable_dir
+    file{ "enable.${mod}.load":
+      path    => "${enable_dir}/${mod}.load",
+      ensure  => link,
+      target  => "${mod_dir}/${mod}.load",
+      owner   => $apache::params::user,
+      group   => $apache::params::group,
+      mode    => '0644',
+      require => File["${mod}.load"],
+      notify  => Service['httpd'],
+    }
+    # Each module may have a .conf file as well, which should be
+    # defined in the class apache::mod::module
+    # Some modules do not require this file.
+    if defined(File["${mod}.conf"]) {
+      file{ "enable.${mod}.conf":
+        path    => "${enable_dir}/${mod}.conf",
+        ensure  => link,
+        target  => "${mod_dir}/${mod}.conf",
+        owner   => $apache::params::user,
+        group   => $apache::params::group,
+        mode    => '0644',
+        require => File["${mod}.conf"],
+        notify  => Service['httpd'],
+      }
+    }
+  }
 }

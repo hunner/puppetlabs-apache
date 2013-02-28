@@ -4,9 +4,10 @@ class apache::mod::passenger (
   $passenger_max_pool_size = undef,
 ) {
   apache::mod { 'passenger': }
-  # Template uses $passenger_root, $passenger_ruby, $passenger_max_pool_size
-  file { "${apache::params::mod_dir}/passenger.conf":
+  # Template uses: $passenger_root, $passenger_ruby, $passenger_max_pool_size
+  file { 'passenger.conf':
     ensure  => present,
+    path    => "${apache::params::mod_dir}/passenger.conf",
     content => template('apache/mod/passenger.conf.erb'),
   }
 }
