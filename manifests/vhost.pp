@@ -59,7 +59,7 @@ define apache::vhost(
     $docroot_owner      = 'root',
     $docroot_group      = 'root',
     $serveradmin        = false,
-    $configure_firewall = true,
+    $configure_firewall = $apache::default_configure_firewall,
     $ssl                = false,
     $ssl_cert           = $apache::default_ssl_cert,
     $ssl_key            = $apache::default_ssl_key,

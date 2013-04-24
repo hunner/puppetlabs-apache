@@ -159,6 +159,10 @@ The default certificate revocation list path, which is automatically set to 'und
 
 The default certificate revocation list to use, which is automatically set to 'undef'. This default will work out of the box but must be updated with your specific certificate information before being used in production.
 
+#####`default_configure_firewall`
+
+The default setting whether a firewall should be configured. Valid values are 'true' or 'false'. Defaults to 'true'.
+
 #####`service_enable`
 
 Determines whether the 'httpd' service is enabled when the machine is booted, meaning Puppet will check the service status to start/stop it. Defaults to 'true', meaning the service is enabled/running.

@@ -13,24 +13,25 @@
 # Sample Usage:
 #
 class apache (
-  $default_mods         = true,
-  $default_vhost        = true,
-  $default_ssl_vhost    = false,
-  $default_ssl_cert     = $apache::params::default_ssl_cert,
-  $default_ssl_key      = $apache::params::default_ssl_key,
-  $default_ssl_chain    = undef,
-  $default_ssl_ca       = undef,
-  $default_ssl_crl_path = undef,
-  $default_ssl_crl      = undef,
-  $service_enable       = true,
-  $purge_configs        = true,
-  $serveradmin          = 'root@localhost',
-  $sendfile             = false,
-  $error_documents      = false,
-  $confd_dir            = $apache::params::confd_dir,
-  $vhost_dir            = $apache::params::vhost_dir,
-  $mod_dir              = $apache::params::mod_dir,
-  $mod_enable_dir       = $apache::params::mod_enable_dir
+  $default_mods               = true,
+  $default_vhost              = true,
+  $default_ssl_vhost          = false,
+  $default_ssl_cert           = $apache::params::default_ssl_cert,
+  $default_ssl_key            = $apache::params::default_ssl_key,
+  $default_ssl_chain          = undef,
+  $default_ssl_ca             = undef,
+  $default_ssl_crl_path       = undef,
+  $default_ssl_crl            = undef,
+  $default_configure_firewall = true,
+  $service_enable             = true,
+  $purge_configs              = true,
+  $serveradmin                = 'root@localhost',
+  $sendfile                   = false,
+  $error_documents            = false,
+  $confd_dir                  = $apache::params::confd_dir,
+  $vhost_dir                  = $apache::params::vhost_dir,
+  $mod_dir                    = $apache::params::mod_dir,
+  $mod_enable_dir             = $apache::params::mod_enable_dir
 ) inherits apache::params {
 
   package { 'httpd':
