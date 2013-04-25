@@ -10,7 +10,10 @@ describe 'apache', :type => :class do
       }
     end
     it { should include_class("apache::params") }
-    it { should contain_package("httpd") }
+    it { should contain_package("httpd").with(
+        'ensure' => 'installed'
+      )
+    }
     it { should contain_user("www-data") }
     it { should contain_group("www-data") }
     it { should contain_service("httpd").with(
@@ -63,7 +66,7 @@ describe 'apache', :type => :class do
     ].each do |modname|
       it { should contain_file("#{modname}.load").with(
         'path'   => "/etc/apache2/mods-available/#{modname}.load",
-        'ensure' => 'file',
+        'ensure' => 'file'
       ) }
       it { should contain_file("#{modname}.load symlink").with(
         'path'   => "/etc/apache2/mods-enabled/#{modname}.load",
@@ -88,7 +91,7 @@ describe 'apache', :type => :class do
     ].each do |modname|
       it { should contain_file("#{modname}.load").with(
         'path'   => "/etc/apache2/mods-available/#{modname}.load",
-        'ensure' => 'file',
+        'ensure' => 'file'
       ) }
       it { should contain_file("#{modname}.load symlink").with(
         'path'   => "/etc/apache2/mods-enabled/#{modname}.load",
@@ -97,7 +100,7 @@ describe 'apache', :type => :class do
       ) }
       it { should contain_file("#{modname}.conf").with(
         'path'   => "/etc/apache2/mods-available/#{modname}.conf",
-        'ensure' => 'file',
+        'ensure' => 'file'
       ) }
       it { should contain_file("#{modname}.conf symlink").with(
         'path'   => "/etc/apache2/mods-enabled/#{modname}.conf",
@@ -115,7 +118,10 @@ describe 'apache', :type => :class do
       }
     end
     it { should include_class("apache::params") }
-    it { should contain_package("httpd") }
+    it { should contain_package("httpd").with(
+        'ensure' => 'installed'
+      )
+    }
     it { should contain_user("apache") }
     it { should contain_group("apache") }
     it { should contain_service("httpd").with(
