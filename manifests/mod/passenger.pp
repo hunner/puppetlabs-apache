@@ -1,13 +1,13 @@
 class apache::mod::passenger (
-  $passengerhighperformance   = off,
-  $passengerpoolidletime      = 300,
-  $passengermaxrequests       = 0,
-  $passengerstatthrottlerate  = 0,
-  $rackautodetect             = on,
-  $railsautodetect            = on
-  $passenger_root          = $apache::params::passenger_root,
-  $passenger_ruby          = $apache::params::passenger_ruby,
-  $passenger_max_pool_size = undef,
+  $passenger_high_performance   = undef,
+  $passenger_pool_idletime      = undef,
+  $passenger_max_requests       = undef,
+  $passenger_stat_throttle_rate = undef,
+  $rack_auto_detect             = undef,
+  $rails_auto_detect            = undef,
+  $passenger_root               = $apache::params::passenger_root,
+  $passenger_ruby               = $apache::params::passenger_ruby,
+  $passenger_max_pool_size      = undef,
 ) {
   # Could do some sanity checking of the parameters here.
 
