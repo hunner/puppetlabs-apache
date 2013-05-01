@@ -102,6 +102,21 @@ describe 'apache::vhost', :type => :define do
           :match => ['  ServerAlias one.com','  ServerAlias two.com'],
         },
         {
+          :title => 'should accept setenv',
+          :attr  => 'setenv',
+          :value => ['TEST1 one','TEST2 two'],
+          :match => ['  SetEnv TEST1 one','  SetEnv TEST2 two'],
+        },
+        {
+          :title => 'should accept setenvif',
+          :attr  => 'setenvif',
+          ## These are bugged in rspec-puppet; the $1 is droped
+          #:value => ['Host "^([^\.]*)\.website\.com$" CLIENT_NAME=$1'],
+          #:match => ['  SetEnvIf Host "^([^\.]*)\.website\.com$" CLIENT_NAME=$1'],
+          :value => ['Host "^test\.com$" VHOST_ACCESS=test'],
+          :match => ['  SetEnvIf Host "^test\.com$" VHOST_ACCESS=test'],
+        },
+        {
           :title => 'should accept options',
           :attr  => 'options',
           :value => ['Fake','Options'],
@@ -118,6 +133,24 @@ describe 'apache::vhost', :type => :define do
           :attr  => 'logroot',
           :value => '/fake/log',
           :match => [/CustomLog \/fake\/log\//,/ErrorLog \/fake\/log\//],
+        },
+        {
+          :title => 'should accept pipe destination for access log',
+          :attr  => 'access_log_pipe',
+          :value => '| /bin/fake/logging',
+          :match => /CustomLog "| \/bin\/fake\/logging" combined$/,
+        },
+        {
+          :title => 'should accept pipe destination for error log',
+          :attr  => 'error_log_pipe',
+          :value => '| /bin/fake/logging',
+          :match => /ErrorLog "| \/bin\/fake\/logging" combined$/,
+        },
+        {
+          :title => 'should accept custom format for access logs',
+          :attr  => 'access_log_format',
+          :value => '%h %{X-Forwarded-For}i %l %u %t \"%r\" %s %b  \"%{Referer}i\" \"%{User-agent}i\" \"Host: %{Host}i\" %T %D',
+          :match => /CustomLog \/var\/log\/.+_access\.log "%h %\{X-Forwarded-For\}i %l %u %t \\"%r\\" %s %b  \\"%\{Referer\}i\\" \\"%\{User-agent\}i\\" \\"Host: %\{Host\}i\\" %T %D"$/,
         },
         {
           :title => 'should contain access logs',
@@ -154,6 +187,15 @@ describe 'apache::vhost', :type => :define do
           :match => ['  RackBaseURI /rack1','  RackBaseURI /rack2'],
         },
         {
+          :title => 'should accept request headers',
+          :attr  => 'request_headers',
+          :value => ['append something', 'unset something_else'],
+          :match => [
+            '  RequestHeader append something',
+            '  RequestHeader unset something_else',
+          ],
+        },
+        {
           :title => 'should accept rewrite rules',
           :attr  => 'rewrite_rule',
           :value => 'not a real rule',
@@ -165,10 +207,21 @@ describe 'apache::vhost', :type => :define do
           :value => 'scm',
           :match => '  <DirectoryMatch .*\.(svn|git|bzr)/.*>',
         },
+        {
+          :title => 'should accept a custom fragment',
+          :attr  => 'custom_fragment',
+          :value => "  Some custom fragment line\n  That spans multiple lines",
+          :match => [
+            '  Some custom fragment line',
+            '  That spans multiple lines',
+            '</VirtualHost>',
+          ],
+        },
       ].each do |param|
         describe "when #{param[:attr]} is #{param[:value]}" do
           let :params do default_params.merge({ param[:attr].to_sym => param[:value] }) end
 
+          it { should contain_file("25-#{title}.conf").with_mode('0644') }
           it param[:title] do
             lines = subject.resource('file', "25-#{title}.conf").send(:parameters)[:content].split("\n")
             (Array(param[:match]).collect { |x| lines.grep x }.flatten.length).should == Array(param[:match]).length
@@ -179,6 +232,24 @@ describe 'apache::vhost', :type => :define do
     end
 
     context 'attribute resources' do
+      describe 'when access_log_file and access_log_pipe are specified' do
+        let :params do default_params.merge({
+          :access_log_file => 'fake.log',
+          :access_log_pipe => '| /bin/fake',
+        }) end
+        it 'should cause a failure' do
+          expect {should raise_error(Puppet::Error, 'Apache::Vhost[${name}]: \'access_log_file\' and \'access_log_pipe\' cannot be defined at the same time') }
+        end
+      end
+      describe 'when error_log_file and error_log_pipe are specified' do
+        let :params do default_params.merge({
+          :error_log_file => 'fake.log',
+          :error_log_pipe => '| /bin/fake',
+        }) end
+        it 'should cause a failure' do
+          expect { should raise_error(Puppet::Error, 'Apache::Vhost[${name}]: \'error_log_file\' and \'error_log_pipe\' cannot be defined at the same time') }
+        end
+      end
       describe 'when docroot owner is specified' do
         let :params do default_params.merge({
           :docroot_owner => 'testuser',
@@ -190,6 +261,54 @@ describe 'apache::vhost', :type => :define do
             :owner  => 'testuser',
             :group  => 'testgroup',
           })
+        end
+      end
+
+      describe 'when rewrite_rule and rewrite_cond are specified' do
+        let :params do default_params.merge({
+          :rewrite_cond => '%{HTTPS} off',
+          :rewrite_rule => '(.*) https://%{HTTPS_HOST}%{REQUEST_URI}',
+        }) end
+        it 'should set RewriteCond' do
+          should contain_file("25-#{title}.conf").with_content(
+            /^  RewriteCond %\{HTTPS\} off$/
+          )
+        end
+      end
+
+      describe 'priority/default settings' do
+        describe 'when neither priority/default is specified' do
+          let :params do default_params end
+          it { should contain_file("25-#{title}.conf").with_path(
+            /25-#{title}.conf/
+          ) }
+        end
+        describe 'when both priority/default_vhost is specified' do
+          let :params do
+            default_params.merge({
+              :priority      => 15,
+              :default_vhost => true,
+            })
+          end
+          it { should contain_file("15-#{title}.conf").with_path(
+            /15-#{title}.conf/
+          ) }
+        end
+        describe 'when only priority is specified' do
+          let :params do
+            default_params.merge({ :priority => 14, })
+          end
+          it { should contain_file("14-#{title}.conf").with_path(
+            /14-#{title}.conf/
+          ) }
+        end
+        describe 'when only default is specified' do
+          let :params do
+            default_params.merge({ :default_vhost => true, })
+          end
+          it { should contain_file("10-#{title}.conf").with_path(
+            /10-#{title}.conf/
+          ) }
         end
       end
 

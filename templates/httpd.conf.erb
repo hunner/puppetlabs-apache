@@ -10,22 +10,6 @@ KeepAlive Off
 MaxKeepAliveRequests 100
 KeepAliveTimeout 15
 
-<IfModule mpm_prefork_module>
-  StartServers       8
-  MinSpareServers    5
-  MaxSpareServers   20
-  ServerLimit      256
-  MaxClients       256
-  MaxRequestsPerChild  4000
-</IfModule>
-<IfModule mpm_worker_module>
-  StartServers         2
-  MaxClients         150
-  MinSpareThreads     25
-  MaxSpareThreads     75
-  ThreadsPerChild     25
-  MaxRequestsPerChild  0
-</IfModule>
 User <%= @user %>
 Group <%= @group %>
 
@@ -51,7 +35,9 @@ EnableSendfile <%= @sendfile %>
 
 #Listen 80
 Include <%= @mod_dir %>/*.load
+<% if @mod_dir != @confd_dir and @mod_dir != @vhost_dir -%>
 Include <%= @mod_dir %>/*.conf
+<% end -%>
 Include <%= @ports_file %>
 
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
@@ -60,7 +46,9 @@ LogFormat "%{Referer}i -> %U" referer
 LogFormat "%{User-agent}i" agent
 
 Include <%= @confd_dir %>/*.conf
+<% if @vhost_dir != @confd_dir -%>
 Include <%= @vhost_dir %>/*.conf
+<% end -%>
 
 <% if @error_documents -%>
 # /usr/share/apache2/error on debian

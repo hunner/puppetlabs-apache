@@ -2,11 +2,14 @@ define apache::mod (
   $package = undef,
   $lib = undef
 ) {
+  if ! defined(Class['apache']) {
+    fail("You must include the apache base class before using any apache defined resources")
+  }
+
   $mod = $name
-  include apache::params
   #include apache #This creates duplicate resources in rspec-puppet
   $lib_path = $apache::params::lib_path
-  $mod_dir = $apache::params::mod_dir
+  $mod_dir = $apache::mod_dir
 
   # Determine if we have special lib
   $mod_libs = $apache::params::mod_libs
@@ -38,12 +41,41 @@ define apache::mod (
 
   file { "${mod}.load":
     path    => "${mod_dir}/${mod}.load",
-    ensure  => present,
-    owner   => $apache::params::user,
-    group   => $apache::params::group,
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
     mode    => '0644',
     content => "LoadModule ${mod}_module ${lib_path}/${lib_REAL}\n",
     require => Package['httpd'],
     notify  => Service['httpd'],
+  }
+
+  if $::osfamily == 'Debian' {
+    $enable_dir = $apache::mod_enable_dir
+    file{ "${mod}.load symlink":
+      path    => "${enable_dir}/${mod}.load",
+      ensure  => link,
+      target  => "${mod_dir}/${mod}.load",
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => File["${mod}.load"],
+      notify  => Service['httpd'],
+    }
+    # Each module may have a .conf file as well, which should be
+    # defined in the class apache::mod::module
+    # Some modules do not require this file.
+    if defined(File["${mod}.conf"]) {
+      file{ "${mod}.conf symlink":
+        path    => "${enable_dir}/${mod}.conf",
+        ensure  => link,
+        target  => "${mod_dir}/${mod}.conf",
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        require => File["${mod}.conf"],
+        notify  => Service['httpd'],
+      }
+    }
   }
 }

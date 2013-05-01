@@ -1,7 +1,8 @@
 class apache::mod::php {
   apache::mod { 'php5': }
-  file { "${apache::params::mod_dir}/php.conf":
-    ensure  => present,
+  file { 'php.conf':
+    ensure  => file,
+    path    => "${apache::mod_dir}/php.conf",
     content => template('apache/mod/php.conf.erb'),
   }
 }

@@ -1,4 +1,4 @@
-class apache::mod::default {
+class apache::default_mods {
   case $::osfamily {
     'debian': {
       include apache::mod::cgid # Debian uses mpm_worker
@@ -25,7 +25,6 @@ class apache::mod::default {
       apache::mod { 'authz_owner': }
       apache::mod { 'expires': }
       apache::mod { 'ext_filter': }
-      apache::mod { 'headers': }
       apache::mod { 'include': }
       apache::mod { 'log_config': }
       apache::mod { 'logio': }
