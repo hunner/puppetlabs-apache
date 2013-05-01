@@ -1,10 +1,10 @@
 class apache::mod::passenger (
   $passenger_high_performance   = undef,
-  $passenger_pool_idletime      = undef,
+  $passenger_pool_idle_time      = undef,
   $passenger_max_requests       = undef,
   $passenger_stat_throttle_rate = undef,
-  $rack_auto_detect             = undef,
-  $rails_auto_detect            = undef,
+  $rack_autodetect             = undef,
+  $rails_autodetect            = undef,
   $passenger_root               = $apache::params::passenger_root,
   $passenger_ruby               = $apache::params::passenger_ruby,
   $passenger_max_pool_size      = undef,
