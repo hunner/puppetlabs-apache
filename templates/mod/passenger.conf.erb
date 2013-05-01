@@ -1,13 +1,13 @@
 # The Passanger Apache module configuration file is being
 # managed by Puppet and changes will be overwritten.
 <IfModule mod_passenger.c>
-  PassengerRoot /usr
-  PassengerRuby /usr/bin/ruby
+  PassengerRoot <%= @passenger_root %>
+  PassengerRuby <%= @passenger_ruby %>
   <%- if passengerhighperformance.downcase != 'off' -%>
   PassengerHighPerformance <%= passengerhighperformance %>
   <%- end -%>
   <%- if passengermaxpoolsize != 6 -%>
-  PassengerMaxPoolSize <%= passengermaxpoolsize %>
+  PassengerMaxPoolSize <%= @passenger_max_pool_size %>
   <%- end -%>
   <%- if passengerpoolidletime != 300 -%>
   PassengerPoolIdleTime <%= passengerpoolidletime %>
