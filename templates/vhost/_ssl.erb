@@ -17,16 +17,16 @@
 <% if @ssl_crl -%>
   SSLCARevocationFile     <%= @ssl_crl %>
 <% end -%>
-<% if @ssl_protocol != 'all' -%>
+<% if @ssl_protocol -%>
   SSLProtocol <%= @ssl_protocol %>
 <% end -%>
-<% if @ssl_cipher_suite != 'ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP' -%>
+<% if @ssl_cipher_suite -%>
   SSLCipherSuite <%= @ssl_cipher_suite %>
 <% end -%>
-<% if @ssl_verify_client != 'none' -%>
+<% if @ssl_verify_client -%>
   SSLVerifyClient <%= @ssl_verify_client %>
 <% end -%>
-<% if @ssl_verify_depth != 1 -%>
+<% if @ssl_verify_depth -%>
   SSLVerifyDepth <%= ssl_verify_depth %>
 <% end -%>
 <% if @ssl_options -%>
