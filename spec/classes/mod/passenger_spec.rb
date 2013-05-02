@@ -14,7 +14,7 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_apache__mod('passenger') }
     it { should contain_package("libapache2-mod-passenger") }
     it { should contain_file('passenger.conf').with({
-      'path' => '/etc/apache2/mods_available/passenger.conf',
+      'path' => '/etc/apache2/mods-available/passenger.conf',
     }) }
   end
   context "on a RedHat OS" do
