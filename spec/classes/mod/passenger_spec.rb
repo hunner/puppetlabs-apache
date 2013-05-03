@@ -70,7 +70,7 @@ describe 'apache::mod::passenger', :type => :class do
       let :params do
         { :passenger_ruby => '/user/lib/example/ruby' }
       end
-      it { should contain_file('passenger.conf').with_content(/^  PannengerRuby \/user\/lib\/example\/ruby$/) }
+      it { should contain_file('passenger.conf').with_content(/^  PassengerRuby \/user\/lib\/example\/ruby$/) }
     end
 
   end
