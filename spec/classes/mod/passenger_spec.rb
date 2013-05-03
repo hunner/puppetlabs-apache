@@ -16,7 +16,9 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_file('passenger.conf').with({
       'path' => '/etc/apache2/mods-available/passenger.conf',
     }) }
-    it { should contain_file('passenger.conf').with_content(/  PassengerRoot \/usr/) }
+    it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr$/) }
+    it { should contain_file('passenger.conf').with_content(/^  PassengerRuby \/usr\/bin\/ruby$/) }
+    it { should contain_file('passenger.conf').without_content(/(PassengerHighPerformance|PassengerMaxPoolSize|PassengerPoolIdleTime|PassengerMaxRequests|PassengerStatThrottleRate|RackAutoDetect|RailsAutoDetect)/) }
   end
   context "on a RedHat OS" do
     let :facts do
@@ -32,6 +34,8 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_file('passenger.conf').with({
       'path' => '/etc/httpd/conf.d/passenger.conf',
     }) }
-    it { should contain_file('passenger.conf').with_content(/  PassengerRoot \/usr/) }
+    it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr$/) }
+    it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr\/bin\/ruby$/) }
+    it { should contain_file('passenger.conf').without_content(/(PassengerHighPerformance|PassengerMaxPoolSize|PassengerPoolIdleTime|PassengerMaxRequests|PassengerStatThrottleRate|RackAutoDetect|RailsAutoDetect)/) }
   end
 end
