@@ -18,6 +18,13 @@ describe 'apache::mod::passenger', :type => :class do
     }) }
     it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr$/) }
     it { should contain_file('passenger.conf').with_content(/^  PassengerRuby \/usr\/bin\/ruby$/) }
+    describe "with passenger_high_performance => true" do
+      let :params do
+        { :passenger_high_performance => 'true' }
+      end
+      it { should contain_file('passenger.conf').with_content(/^  PassengerHighPerformance true$/) }
+    end
+
   end
   context "on a RedHat OS" do
     let :facts do
