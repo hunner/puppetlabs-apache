@@ -18,7 +18,6 @@ describe 'apache::mod::passenger', :type => :class do
     }) }
     it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr$/) }
     it { should contain_file('passenger.conf').with_content(/^  PassengerRuby \/usr\/bin\/ruby$/) }
-    it { should contain_file('passenger.conf').without_content(/^  PassengerHighPerformance/) }
   end
   context "on a RedHat OS" do
     let :facts do
@@ -34,8 +33,7 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_file('passenger.conf').with({
       'path' => '/etc/httpd/conf.d/passenger.conf',
     }) }
-    it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr$/) }
+    it { should contain_file('passenger.conf').with_content(/^  PassengerRoot \/usr\/share\/rubygems\/gems\/passenger-3.0.17$/) }
     it { should contain_file('passenger.conf').with_content(/^  PassengerRuby \/usr\/bin\/ruby$/) }
-    it { should contain_file('passenger.conf').without_content(/^  PassengerHighPerformance/) }
   end
 end
