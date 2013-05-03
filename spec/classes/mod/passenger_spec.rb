@@ -16,6 +16,7 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_file('passenger.conf').with({
       'path' => '/etc/apache2/mods-available/passenger.conf',
     }) }
+    it { should contain_file('passenger.conf').with_content(/  PassengerRoot \/usr/) }
   end
   context "on a RedHat OS" do
     let :facts do
@@ -31,5 +32,6 @@ describe 'apache::mod::passenger', :type => :class do
     it { should contain_file('passenger.conf').with({
       'path' => '/etc/httpd/conf.d/passenger.conf',
     }) }
+    it { should contain_file('passenger.conf').with_content(/  PassengerRoot \/usr/) }
   end
 end
