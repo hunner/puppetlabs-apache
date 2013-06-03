@@ -83,10 +83,14 @@ define apache::vhost(
     $logroot            = "/var/log/${apache::params::apache_name}",
     $access_log         = true,
     $access_log_file    = undef,
+    $access_log_pipe    = undef,
+    $access_log_format  = undef,
     $error_log          = true,
     $error_log_file     = undef,
+    $error_log_pipe     = undef,
     $scriptalias        = undef,
     $proxy_dest         = undef,
+    $proxy_pass         = undef,
     $no_proxy_uris      = [],
     $redirect_source    = '/',
     $redirect_dest      = undef,
@@ -114,8 +118,17 @@ define apache::vhost(
   validate_bool($ip_based)
   validate_bool($configure_firewall)
   validate_bool($access_log)
+  validate_bool($error_log)
   validate_bool($ssl)
   validate_bool($default_vhost)
+
+  if $access_log_file and $access_log_pipe {
+    fail("Apache::Vhost[${name}]: 'access_log_file' and 'access_log_pipe' cannot be defined at the same time")
+  }
+
+  if $error_log_file and $error_log_pipe {
+    fail("Apache::Vhost[${name}]: 'error_log_file' and 'error_log_pipe' cannot be defined at the same time")
+  }
 
   if $ssl {
     include apache::mod::ssl
@@ -148,24 +161,37 @@ define apache::vhost(
   }
 
   # Define log file names
-  if ! $access_log_file {
-    if $ssl {
-      $access_log_file_real = "${servername_real}_access_ssl.log"
-    } else {
-      $access_log_file_real = "${servername_real}_access.log"
-    }
+  if $access_log_file {
+    $access_log_destination = "${logroot}/${access_log_file}"
+  } elsif $access_log_pipe {
+    $access_log_destination = "\"${access_log_pipe}\""
   } else {
-    $access_log_file_real = $access_log_file
-  }
-  if ! $error_log_file {
     if $ssl {
-      $error_log_file_real = "${servername_real}_error_ssl.log"
+      $access_log_destination = "${logroot}/${servername_real}_access_ssl.log"
     } else {
-      $error_log_file_real = "${servername_real}_error.log"
+      $access_log_destination = "${logroot}/${servername_real}_access.log"
     }
-  } else {
-    $error_log_file_real = $error_log_file
   }
+
+  if $error_log_file {
+    $error_log_destination = "${logroot}/${error_log_file}"
+  } elsif $error_log_pipe {
+    $error_log_destination = "\"${error_log_pipe}\""
+  } else {
+    if $ssl {
+      $error_log_destination = "${logroot}/${servername_real}_error_ssl.log"
+    } else {
+      $error_log_destination = "${logroot}/${servername_real}_error.log"
+    }
+  }
+
+  # Set access log format
+  if $access_log_format {
+    $_access_log_format = "\"${access_log_format}\""
+  } else {
+    $_access_log_format = 'combined'
+  }
+
 
   if $ip {
     if $port {
@@ -217,7 +243,7 @@ define apache::vhost(
   }
 
   # Load mod_proxy if needed and not yet loaded
-  if $proxy_dest {
+  if ($proxy_dest or $proxy_pass) {
     if ! defined(Class['apache::mod::proxy']) {
       include apache::mod::proxy
     }
@@ -271,9 +297,10 @@ define apache::vhost(
   # - $logroot
   # - $name
   # - $access_log
-  # - $access_log_file_real
+  # - $access_log_destination
+  # - $_access_log_format
   # - $error_log
-  # - $error_log_file_real
+  # - $error_log_destination
   # - $custom_fragment
   # block fragment:
   #   - $block
