@@ -229,7 +229,7 @@ Sets the servername. Defaults to fqdn provided by facter.
 
 #####`sendfile`
 
-Makes Apache use the Linux kernel 'sendfile' to serve static files. Defaults to 'false'.
+Makes Apache use the Linux kernel 'sendfile' to serve static files. Defaults to 'On'.
 
 #####`error_documents`
 
@@ -282,6 +282,15 @@ Controls how much information Apache sends to the browser about itself and the o
 #####`server_signature`
 
 Allows the configuration of a trailing footer line under server-generated documents. See Apache documentation for 'ServerSignature'. Defaults to 'On'.
+
+#####`manage_user`
+
+Setting this to false will avoid the user resource to be created by this module. This is useful when you already have a user created in another puppet module and that you want to used it to run apache. Without this, it would result in a duplicate resource error. 
+
+#####`manage_group`
+
+Setting this to false will avoid the group resource to be created by this module. This is useful when you already have a group created in another puppet module and that you want to used it for apache. Without this, it would result in a duplicate resource error. 
+
 
 ####Class: `apache::default_mods`
 

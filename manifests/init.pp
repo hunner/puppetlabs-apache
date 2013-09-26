@@ -26,8 +26,9 @@ class apache (
   $purge_configs        = true,
   $purge_vdir           = false,
   $serveradmin          = 'root@localhost',
-  $sendfile             = false,
+  $sendfile             = 'On',
   $error_documents      = false,
+  $timeout              = '120',
   $httpd_dir            = $apache::params::httpd_dir,
   $confd_dir            = $apache::params::confd_dir,
   $vhost_dir            = $apache::params::vhost_dir,
@@ -37,6 +38,8 @@ class apache (
   $mpm_module           = $apache::params::mpm_module,
   $conf_template        = $apache::params::conf_template,
   $servername           = $apache::params::servername,
+  $manage_user          = true,
+  $manage_group         = true,
   $user                 = $apache::params::user,
   $group                = $apache::params::group,
   $keepalive            = $apache::params::keepalive,
@@ -59,18 +62,24 @@ class apache (
   if $mpm_module {
     validate_re($mpm_module, '(prefork|worker|itk)')
   }
+  validate_re($sendfile, [ '^[oO]n$' , '^[oO]ff$' ])
 
   # declare the web server user and group
   # Note: requiring the package means the package ought to create them and not puppet
-  group { $group:
-    ensure  => present,
-    require => Package['httpd']
+  validate_bool($manage_user)
+  if $manage_user {
+    user { $user:
+      ensure  => present,
+      gid     => $group,
+      require => Package['httpd'],
+    }
   }
-
-  user { $user:
-    ensure  => present,
-    gid     => $group,
-    require => Package['httpd'],
+  validate_bool($manage_group)
+  if $manage_group {
+    group { $group:
+      ensure  => present,
+      require => Package['httpd']
+    }
   }
 
   class { 'apache::service':
