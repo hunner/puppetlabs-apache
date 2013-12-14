@@ -2,9 +2,13 @@ require 'beaker-rspec/spec_helper'
 require 'beaker-rspec/helpers/serverspec'
 
 hosts.each do |host|
-  # Install Puppet
-  install_package host, 'rubygems'
-  on host, 'gem install puppet --no-ri --no-rdoc'
+  # Install Puppet & Facter
+  if options[:type] == 'pe'
+    install_pe
+  else
+    install_package host, 'rubygems'
+    on host, 'gem install puppet --no-ri --no-rdoc'
+  end
   on host, "mkdir -p #{host['distmoduledir']}"
 end
 

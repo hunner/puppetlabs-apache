@@ -2,7 +2,13 @@ HOSTS:
   centos-64-x64:
     roles:
       - master
+      - agent
+      - database
+      - dashboard
     platform: el-6-x86_64
     box : centos-64-x64-vbox4210-nocm
     box_url : http://puppet-vagrant-boxes.puppetlabs.com/centos-64-x64-vbox4210-nocm.box
     hypervisor : vagrant
+    pe_dir : http://enterprise.delivery.puppetlabs.net/3.1/ci-ready/
+CONFIG:
+  type: pe
