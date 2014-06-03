@@ -1110,6 +1110,18 @@ describe 'apache::vhost', :type => :define do
           expect { subject }.to raise_error(Puppet::Error, /'error_log_file' and 'error_log_pipe' cannot be defined at the same time/)
         end
       end
+      describe 'when logroot and logroot_mode are specified' do
+        let :params do default_params.merge({
+          :logroot       => '/rspec/logroot',
+          :logroot_mode  => '0755',
+        }) end
+        it 'should set logroot mode' do
+          should contain_file(params[:logroot]).with({
+            :ensure => :directory,
+            :mode   => '0755',
+          })
+        end
+      end
       describe 'when docroot owner and mode is specified' do
         let :params do default_params.merge({
           :docroot_owner => 'testuser',
@@ -1277,6 +1289,42 @@ describe 'apache::vhost', :type => :define do
           it { should contain_file("10-#{title}.conf").with_path(
             /10-#{title}.conf/
           ) }
+        end
+      end
+
+      describe 'fcgid directory options' do
+        describe 'No fcgiwrapper' do
+          let :params do
+            default_params.merge({
+              :directories      => { 'path' => '/srv/www' },
+            })
+          end
+
+          it { should_not contain_file("25-#{title}.conf").with_content(%r{FcgidWrapper}) }
+        end
+
+        describe 'Only a command' do
+          let :params do
+            default_params.merge({
+              :directories      => { 'path' => '/srv/www',
+                'fcgiwrapper' => { 'command' => '/usr/local/bin/fcgiwrapper' },
+              }
+            })
+          end
+
+          it { should contain_file("25-#{title}.conf").with_content(%r{^    FcgidWrapper /usr/local/bin/fcgiwrapper  $}) }
+        end
+
+        describe 'All parameters' do
+          let :params do
+            default_params.merge({
+              :directories    => { 'path' => '/srv/www',
+                'fcgiwrapper' => { 'command' => '/usr/local/bin/fcgiwrapper', 'suffix' => '.php', 'virtual' => 'virtual' },
+              }
+            })
+          end
+
+          it { should contain_file("25-#{title}.conf").with_content(%r{^    FcgidWrapper /usr/local/bin/fcgiwrapper .php virtual$}) }
         end
       end
 
